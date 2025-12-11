@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="CSW Load Test" enabled="true"/>
+    <hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="CSW Users" enabled="true">
+        <stringProp name="ThreadGroup.num_threads">${__env(USERS)}</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">${__env(RAMPUP)}</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">-1</stringProp>
+        </elementProp>
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.duration">${__env(DURATION)}</stringProp>
+      </ThreadGroup>
+      <hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="CSW GetRecords (POST)" enabled="true">
+          <stringProp name="HTTPSampler.domain">${__env(HOST)}</stringProp>
+          <stringProp name="HTTPSampler.port">${__env(PORT)}</stringProp>
+          <stringProp name="HTTPSampler.protocol">${__env(PROTOCOL)}</stringProp>
+          <stringProp name="HTTPSampler.path">${__env(CSW_ENDPOINT)}</stringProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp elementType="HTTPArgument" name="xml">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="HTTPArgument.value"><![CDATA[
+<GetRecords xmlns="http://www.opengis.net/cat/csw/2.0.2" service="CSW" version="2.0.2" resultType="results">
+  <Query typeNames="${__env(CSW_COLLECTION)}"/>
+</GetRecords>
+                ]]></stringProp>
+                <stringProp name="HTTPArgument.metadata">true</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert HTTP 200" enabled="true">
+            <stringProp name="ResponseAssertion.test_field">Assertion.response_code</stringProp>
+            <collectionProp name="Asserion.test_strings">
+              <stringProp name="1">200</stringProp>
+            </collectionProp>
+          </ResponseAssertion>
+          <hashTree/>
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert contains GetRecords" enabled="true">
+            <stringProp name="ResponseAssertion.test_field">Assertion.response_data</stringProp>
+            <collectionProp name="Asserion.test_strings">
+              <stringProp name="1">GetRecordsResponse</stringProp>
+            </collectionProp>
+          </ResponseAssertion>
+          <hashTree/>
+        </hashTree>
+      </hashTree>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>

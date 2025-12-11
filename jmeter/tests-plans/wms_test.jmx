@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="WMS Load Test" enabled="true"/>
+    <hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="WMS Users" enabled="true">
+        <stringProp name="ThreadGroup.num_threads">${__env(USERS)}</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">${__env(RAMPUP)}</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">-1</stringProp>
+        </elementProp>
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.duration">${__env(DURATION)}</stringProp>
+      </ThreadGroup>
+      <hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="WMS GetMap" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp elementType="HTTPArgument" name="service">
+                <stringProp name="HTTPArgument.name">service</stringProp>
+                <stringProp name="HTTPArgument.value">WMS</stringProp>
+              </elementProp>
+              <elementProp elementType="HTTPArgument" name="request">
+                <stringProp name="HTTPArgument.name">request</stringProp>
+                <stringProp name="HTTPArgument.value">GetMap</stringProp>
+              </elementProp>
+              <elementProp elementType="HTTPArgument" name="layers">
+                <stringProp name="HTTPArgument.name">layers</stringProp>
+                <stringProp name="HTTPArgument.value">${__env(LAYER_NAME)}</stringProp>
+              </elementProp>
+              <elementProp elementType="HTTPArgument" name="bbox">
+                <stringProp name="HTTPArgument.name">bbox</stringProp>
+                <stringProp name="HTTPArgument.value">${__env(WMS_BBOX)}</stringProp>
+              </elementProp>
+              <elementProp elementType="HTTPArgument" name="width">
+                <stringProp name="HTTPArgument.name">width</stringProp>
+                <stringProp name="HTTPArgument.value">${__env(WMS_WIDTH)}</stringProp>
+              </elementProp>
+              <elementProp elementType="HTTPArgument" name="height">
+                <stringProp name="HTTPArgument.name">height</stringProp>
+                <stringProp name="HTTPArgument.value">${__env(WMS_HEIGHT)}</stringProp>
+              </elementProp>
+              <elementProp elementType="HTTPArgument" name="format">
+                <stringProp name="HTTPArgument.name">format</stringProp>
+                <stringProp name="HTTPArgument.value">${__env(WMS_FORMAT)}</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain">${__env(HOST)}</stringProp>
+          <stringProp name="HTTPSampler.port">${__env(PORT)}</stringProp>
+          <stringProp name="HTTPSampler.protocol">${__env(PROTOCOL)}</stringProp>
+          <stringProp name="HTTPSampler.path">/geoserver/ows</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert HTTP 200" enabled="true">
+            <stringProp name="ResponseAssertion.test_field">Assertion.response_code</stringProp>
+            <collectionProp name="Asserion.test_strings">
+              <stringProp name="1">200</stringProp>
+            </collectionProp>
+          </ResponseAssertion>
+          <hashTree/>
+        </hashTree>
+      </hashTree>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>

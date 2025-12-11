@@ -1,0 +1,23 @@
+version: "3.9"
+
+services:
+  jmeter:
+    container_name: jmeter
+    build:
+      context: ./jmeter
+      dockerfile: Dockerfile
+    env_file: .env
+    volumes:
+      - ./jmeter/test-plans:/test-plans
+      - ./jmeter/scripts:/scripts
+      - ./jmeter/reports:/reports
+      - ./jmeter/data:/tests/data
+    entrypoint: ["/bin/bash", "/scripts/run-tests.sh"]
+    #entrypoint: ["tail", "-f", "/dev/null"] #subri o JMeter sem rodas os testes automaticamente.
+    tty: true
+    networks:
+      - jmeter-net
+
+networks:
+  jmeter-net:
+    driver: bridge
