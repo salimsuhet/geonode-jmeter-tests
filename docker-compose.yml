@@ -18,6 +18,31 @@ services:
     networks:
       - jmeter-net
 
+  nginx:
+    image: nginx:alpine
+    container_name: jmeter-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./jmeter/reports:/usr/share/nginx/html/reports:ro
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/auth:/etc/nginx/auth:ro
+      - ./nginx/certbot/conf:/etc/letsencrypt
+      - ./nginx/certbot/www:/var/www/certbot
+    depends_on:
+      - jmeter
+    networks:
+      - jmeter-net
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./nginx/certbot/conf:/etc/letsencrypt
+      - ./nginx/certbot/www:/var/www/certbot
+    networks:
+      - jmeter-net
+
 networks:
   jmeter-net:
     driver: bridge

@@ -195,6 +195,88 @@ No extra configuration required unless your GeoNode uses OAuth2 or SSO.
 
 ---
 
+---
+
+## 📊 Listing JMeter Reports on the Web (HTTPS)
+
+This project includes an **Nginx + Certbot** setup to publish JMeter HTML reports over **HTTPS**, protected by **Basic Authentication**.
+
+Once configured, reports will be available at:
+
+
+---
+
+### 🚀 Initial Setup (one-time)
+
+Run the following steps **in order** on the host machine:
+
+#### 1️⃣ Create Basic Authentication automatically
+
+This step generates the `htpasswd` file if it does not already exist.
+
+```bash
+./scripts/init-auth.sh
+````
+
+---
+
+#### 2️⃣ Start Nginx (required for the HTTP challenge)
+
+Nginx must be running to allow Let's Encrypt to validate the domain.
+
+```bash
+docker compose up -d nginx
+```
+
+---
+
+#### 3️⃣ Generate the HTTPS certificate automatically
+
+This step requests a Let's Encrypt certificate using Certbot.
+
+```bash
+./scripts/init-certbot.sh
+```
+
+---
+
+#### 4️⃣ Restart Nginx with HTTPS enabled
+
+After the certificate is issued, restart Nginx to enable TLS.
+
+```bash
+docker compose restart nginx
+```
+
+---
+
+### ✅ Result
+
+* 🔒 HTTPS enabled via Let's Encrypt
+* 🔐 Basic Authentication enabled
+* 📂 Automatic directory listing of JMeter HTML reports
+
+Access:
+
+```
+https://DOMAIN/reports/
+```
+
+---
+
+### 🔁 Certificate Renewal
+
+Certificates are renewed automatically.
+To renew manually:
+
+```bash
+docker compose run --rm certbot renew && docker compose restart nginx
+```
+
+---
+
+---
+
 ## 📦 Docker Compose File
 
 The compose file:
