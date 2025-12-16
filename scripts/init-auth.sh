@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-AUTH_DIR="./nginx/"
+AUTH_DIR="./nginx/auth/"
 HTPASSWD_FILE="${AUTH_DIR}/htpasswd"
 
 AUTH_USER=${AUTH_USER:-admin}

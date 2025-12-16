@@ -1,9 +1,11 @@
 #!/bin/bash
 set -e
 
-# Carrega variáveis do .env (se existir)
+# Carrega variáveis do .env de forma segura
 if [ -f ".env" ]; then
-  export $(grep -v '^#' .env | xargs)
+  set -a
+  source .env
+  set +a
 fi
 
 DOMAIN="${CERTBOT_DOMAIN}"
