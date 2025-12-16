@@ -1,11 +1,14 @@
 #!/bin/bash
 set -e
 
-# Carrega variáveis do .env de forma segura
+# Carrega variáveis do .env
 if [ -f ".env" ]; then
   set -a
   source .env
   set +a
+else
+  echo "ERROR: arquivo .env não encontrado"
+  exit 1
 fi
 
 DOMAIN="${CERTBOT_DOMAIN}"
@@ -23,6 +26,13 @@ if [ -d "${CERT_PATH}" ]; then
   exit 0
 fi
 
+echo "Verificando se o nginx está rodando..."
+if ! docker compose ps nginx | grep -q "Up"; then
+  echo "ERROR: nginx não está rodando. Execute:"
+  echo "  docker compose up -d nginx"
+  exit 1
+fi
+
 echo "Gerando certificado para ${DOMAIN}"
 
 docker compose run --rm certbot certonly \
@@ -33,4 +43,4 @@ docker compose run --rm certbot certonly \
   --no-eff-email \
   -d "${DOMAIN}"
 
-echo "Certificado criado com sucesso"
+echo "Certificado criado com sucesso para ${DOMAIN}"
