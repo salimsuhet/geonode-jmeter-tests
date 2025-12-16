@@ -32,32 +32,6 @@ docker compose up --build
 
 ---
 
-## 🧱 Repository Structure
-
-```
-
-.
-├── docker-compose.yml
-├── .env
-├── jmeter/
-│   ├── Dockerfile
-│   ├── test-plans/
-│   │   ├── wfs_read.jmx
-│   │   ├── wms_read.jmx
-│   │   ├── csw_search.jmx
-│   │   └── upload_dataset.jmx
-│   ├── scripts/
-│   │   ├── run-tests.sh
-│   │   └── gen-report.sh
-│   ├── reports/
-│   └── data/
-│       └── sample.zip
-
-
-````
-
----
-
 ## ⚙️ Requirements
 
 - Ubuntu 24.04 VM  
@@ -70,17 +44,6 @@ docker compose up --build
 ## 🔧 Configuration (ENV file)
 
 Create a `.env` with your environment parameters:
-
-```env
-GEONODE_BASE_URL=https://ide-hm.geobases.es.gov.br
-GEONODE_USERNAME=admin
-GEONODE_PASSWORD=senha123
-THREADS=50
-RAMPUP=20
-DURATION=120
-UPLOAD_FILE=/data/input/dataset.zip
-````
-
 You can mount as many test files as you want under:
 
 ```
