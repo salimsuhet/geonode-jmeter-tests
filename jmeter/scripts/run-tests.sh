@@ -1,16 +1,11 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 echo "=== GeoNode Load Testing – Running Test Plans ==="
 
-# carrega .env
-if [ -f ".env" ]; then
-  export $(grep -v '^#' .env | xargs)
-fi
-
 # monta BASE_URL se não existir
-if [ -z "$BASE_URL" ]; then
-  if [ -n "$PORT" ] && [ "$PORT" != "80" ] && [ "$PORT" != "443" ]; then
+if [ -z "${BASE_URL:-}" ]; then
+  if [ -n "${PORT:-}" ] && [ "$PORT" != "80" ] && [ "$PORT" != "443" ]; then
     export BASE_URL="${PROTOCOL}://${HOST}:${PORT}"
   else
     export BASE_URL="${PROTOCOL}://${HOST}"
@@ -33,9 +28,8 @@ mkdir -p "${RUN_DIR}"
 
 echo "Gerando diretório de execução: ${RUN_DIR}"
 
-# Carregando variáveis do ambiente
 echo "Usando parametros:"
-echo "BASE_URL=${GEONODE_BASE_URL}"
+echo "BASE_URL=${BASE_URL}"
 echo "THREADS=${THREADS}"
 echo "RAMPUP=${RAMPUP}"
 echo "DURATION=${DURATION}"
@@ -59,7 +53,6 @@ for plan in ${TEST_PLANS_DIR}/*.jmx; do
   echo "----------------------------------------------------"
 
   jmeter -n -t "${plan}" -l "${RESULT_FILE}"
-
 done
 
 echo "=== Todos os testes executados! ==="
