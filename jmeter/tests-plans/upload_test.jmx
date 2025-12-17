@@ -2,34 +2,38 @@
 <jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
   <hashTree>
     <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Upload Test Plan" enabled="true">
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.tearDown_on_shutdown">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
       <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
         <collectionProp name="Arguments.arguments">
+          <!-- define BASE_URL and upload path if needed -->
           <elementProp name="BASE_URL" elementType="Argument">
             <stringProp name="Argument.name">BASE_URL</stringProp>
-            <stringProp name="Argument.value">${__P(BASE_URL,)}</stringProp>
+            <stringProp name="Argument.value">${__P(BASE_URL)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
         </collectionProp>
       </elementProp>
     </TestPlan>
     <hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui"
-                  testclass="ThreadGroup"
-                  testname="Upload Thread Group"
-                  enabled="true">
 
+      <!-- Thread Group -->
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Upload Thread Group" enabled="true">
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
-
-        <elementProp name="ThreadGroup.main_controller"
-                    elementType="LoopController">
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController">
           <boolProp name="LoopController.continue_forever">false</boolProp>
           <intProp name="LoopController.loops">1</intProp>
         </elementProp>
-
-        <!-- valores NUMÉRICOS -->
+        <!-- fixed numbers – JMeter CLI doesn't allow functions here -->
         <intProp name="ThreadGroup.num_threads">1</intProp>
         <intProp name="ThreadGroup.ramp_time">1</intProp>
-
+        <longProp name="ThreadGroup.start_time">0</longProp>
+        <longProp name="ThreadGroup.end_time">0</longProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
       </ThreadGroup>
+      <hashTree>
+
         <!-- HTTP Header Manager for Basic Auth -->
         <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
           <collectionProp name="HeaderManager.headers">
@@ -41,7 +45,7 @@
         </HeaderManager>
         <hashTree/>
 
-        <!-- HTTP Sampler for upload -->
+        <!-- HTTP Sampler: Upload -->
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Upload Request" enabled="true">
           <stringProp name="HTTPSampler.domain">${__P(HOST)}</stringProp>
           <stringProp name="HTTPSampler.protocol">${__P(PROTOCOL)}</stringProp>
@@ -53,15 +57,16 @@
           <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
           <boolProp name="HTTPSampler.DO_MULTIPART_POST">true</boolProp>
 
-          <!-- File Upload -->
+          <!-- file upload -->
           <elementProp name="HTTPsampler.Files" elementType="HTTPFileArgs">
             <collectionProp name="HTTPFileArgs.files">
               <elementProp name="file1" elementType="HTTPFileArg">
-                <stringProp name="File.path">${__P(UPLOAD_FILE,)}</stringProp>
-                <stringProp name="File.paramname">${__P(UPLOAD_FORM_FIELD,)}</stringProp>
+                <stringProp name="File.path">${__P(UPLOAD_FILE)}</stringProp>
+                <stringProp name="File.paramname">${__P(UPLOAD_FORM_FIELD)}</stringProp>
               </elementProp>
             </collectionProp>
           </elementProp>
+
         </HTTPSamplerProxy>
         <hashTree/>
 
