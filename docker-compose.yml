@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   jmeter:
     container_name: jmeter
@@ -13,7 +11,7 @@ services:
       - ./jmeter/reports:/reports
       - ./jmeter/data:/tests/data
     entrypoint: ["/bin/bash", "/scripts/run-tests.sh"]
-    #entrypoint: ["tail", "-f", "/dev/null"] #subri o JMeter sem rodas os testes automaticamente.
+    # entrypoint: ["tail", "-f", "/dev/null"] # subir o JMeter sem rodar os testes
     tty: true
     networks:
       - jmeter-net
@@ -37,9 +35,17 @@ services:
 
   certbot:
     image: certbot/certbot
+    container_name: jmeter-certbot
     volumes:
       - ./nginx/certbot/conf:/etc/letsencrypt
       - ./nginx/certbot/www:/var/www/certbot
+    command: >
+      certonly --webroot
+      --webroot-path=/var/www/certbot
+      --email ${CERTBOT_EMAIL}
+      --agree-tos
+      --no-eff-email
+      -d ${CERTBOT_DOMAIN}
     networks:
       - jmeter-net
 
