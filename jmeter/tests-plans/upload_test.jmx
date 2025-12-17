@@ -12,17 +12,24 @@
       </elementProp>
     </TestPlan>
     <hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Upload Thread Group" enabled="true">
+      <ThreadGroup guiclass="ThreadGroupGui"
+                  testclass="ThreadGroup"
+                  testname="Upload Thread Group"
+                  enabled="true">
+
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
-        <elementProp name="ThreadGroup.main_controller" elementType="LoopController">
+
+        <elementProp name="ThreadGroup.main_controller"
+                    elementType="LoopController">
           <boolProp name="LoopController.continue_forever">false</boolProp>
           <intProp name="LoopController.loops">1</intProp>
         </elementProp>
-        <intProp name="ThreadGroup.num_threads">${__P(THREADS,1)}</intProp>
-        <intProp name="ThreadGroup.ramp_time">${__P(RAMPUP,1)}</intProp>
-      </ThreadGroup>
-      <hashTree>
 
+        <!-- valores NUMÉRICOS -->
+        <intProp name="ThreadGroup.num_threads">1</intProp>
+        <intProp name="ThreadGroup.ramp_time">1</intProp>
+
+      </ThreadGroup>
         <!-- HTTP Header Manager for Basic Auth -->
         <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
           <collectionProp name="HeaderManager.headers">
