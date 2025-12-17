@@ -10,8 +10,8 @@ services:
       - ./jmeter/scripts:/scripts
       - ./jmeter/reports:/reports
       - ./jmeter/data:/tests/data
-    entrypoint: ["/bin/bash", "/scripts/run-tests.sh"]
-    # entrypoint: ["tail", "-f", "/dev/null"] # subir o JMeter sem rodar os testes
+    #entrypoint: ["/bin/bash", "/scripts/run-tests.sh"]
+    entrypoint: ["tail", "-f", "/dev/null"] # subir o JMeter sem rodar os testes
     tty: true
     networks:
       - jmeter-net
