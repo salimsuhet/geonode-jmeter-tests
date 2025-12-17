@@ -3,6 +3,26 @@ set -e
 
 echo "=== GeoNode Load Testing – Running Test Plans ==="
 
+# carrega .env
+if [ -f ".env" ]; then
+  export $(grep -v '^#' .env | xargs)
+fi
+
+# monta BASE_URL se não existir
+if [ -z "$BASE_URL" ]; then
+  if [ -n "$PORT" ] && [ "$PORT" != "80" ] && [ "$PORT" != "443" ]; then
+    export BASE_URL="${PROTOCOL}://${HOST}:${PORT}"
+  else
+    export BASE_URL="${PROTOCOL}://${HOST}"
+  fi
+fi
+
+# THREADS vem de USERS
+export THREADS="${USERS}"
+
+echo "BASE_URL=${BASE_URL}"
+echo "THREADS=${THREADS}"
+
 # Diretórios dentro do container
 TEST_PLANS_DIR="/tests-plans"
 REPORTS_DIR="/reports"
