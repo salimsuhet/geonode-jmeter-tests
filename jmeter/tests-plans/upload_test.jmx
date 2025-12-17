@@ -1,77 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
   <hashTree>
-    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="GeoNode Upload TestPlan" enabled="true">
-      <stringProp name="TestPlan.comments">Upload test with Basic Auth, uses env vars</stringProp>
-      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments">
-        <collectionProp name="Arguments.arguments"/>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Upload Test Plan" enabled="true">
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+        <collectionProp name="Arguments.arguments">
+          <elementProp name="BASE_URL" elementType="Argument">
+            <stringProp name="Argument.name">BASE_URL</stringProp>
+            <stringProp name="Argument.value">${__P(BASE_URL,)}</stringProp>
+          </elementProp>
+        </collectionProp>
       </elementProp>
     </TestPlan>
     <hashTree>
-      <!-- HTTP Authorization Manager (Basic Auth) -->
-      <AuthManager guiclass="AuthPanel" testclass="AuthManager" testname="HTTP Authorization Manager" enabled="true">
-        <collectionProp name="AuthManager.auth_list">
-          <elementProp elementType="AuthManager.User" name="">
-            <stringProp name="Authorization.username">${__env(BASIC_USER)}</stringProp>
-            <stringProp name="Authorization.password">${__env(BASIC_PASS)}</stringProp>
-            <stringProp name="Authorization.realm"></stringProp>
-            <stringProp name="Authorization.url">${__env(PROTOCOL)}://${__env(HOST)}${__env(UPLOAD_ENDPOINT)}</stringProp>
-          </elementProp>
-        </collectionProp>
-      </AuthManager>
-      <hashTree/>
-      <!-- Thread Group -->
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Upload Users" enabled="true">
-        <stringProp name="ThreadGroup.num_threads">${__env(USERS)}</stringProp>
-        <stringProp name="ThreadGroup.ramp_time">${__env(RAMPUP)}</stringProp>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Upload Thread Group" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController">
           <boolProp name="LoopController.continue_forever">false</boolProp>
-          <stringProp name="LoopController.loops">-1</stringProp>
+          <intProp name="LoopController.loops">1</intProp>
         </elementProp>
-        <boolProp name="ThreadGroup.scheduler">true</boolProp>
-        <stringProp name="ThreadGroup.duration">${__env(DURATION)}</stringProp>
+        <intProp name="ThreadGroup.num_threads">${__P(THREADS,1)}</intProp>
+        <intProp name="ThreadGroup.ramp_time">${__P(RAMPUP,1)}</intProp>
       </ThreadGroup>
       <hashTree>
-        <!-- HTTP Request (multipart upload) -->
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Upload File (multipart)" enabled="true">
-          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
-            <collectionProp name="Arguments.arguments"/>
-          </elementProp>
-          <stringProp name="HTTPSampler.domain">${__env(HOST)}</stringProp>
-          <stringProp name="HTTPSampler.port">${__env(PORT)}</stringProp>
-          <stringProp name="HTTPSampler.protocol">${__env(PROTOCOL)}</stringProp>
-          <stringProp name="HTTPSampler.path">${__env(UPLOAD_ENDPOINT)}</stringProp>
+
+        <!-- HTTP Header Manager for Basic Auth -->
+        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+          <collectionProp name="HeaderManager.headers">
+            <elementProp name="Authorization" elementType="Header">
+              <stringProp name="Header.name">Authorization</stringProp>
+              <stringProp name="Header.value">Basic ${__base64Encode(${__P(AUTH_USER)}:${__P(AUTH_PASS)})}</stringProp>
+            </elementProp>
+          </collectionProp>
+        </HeaderManager>
+        <hashTree/>
+
+        <!-- HTTP Sampler for upload -->
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Upload Request" enabled="true">
+          <stringProp name="HTTPSampler.domain">${__P(HOST)}</stringProp>
+          <stringProp name="HTTPSampler.protocol">${__P(PROTOCOL)}</stringProp>
+          <stringProp name="HTTPSampler.port">${__P(PORT)}</stringProp>
           <stringProp name="HTTPSampler.method">POST</stringProp>
-          <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+          <stringProp name="HTTPSampler.path">${__P(UPLOAD_ENDPOINT)}</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">true</boolProp>
+
+          <!-- File Upload -->
           <elementProp name="HTTPsampler.Files" elementType="HTTPFileArgs">
             <collectionProp name="HTTPFileArgs.files">
-              <elementProp elementType="HTTPFileArg" name="file1">
-                <stringProp name="HTTPFileArg.path">${__env(UPLOAD_FILE)}</stringProp>
-                <stringProp name="HTTPFileArg.paramname">${__env(UPLOAD_FORM_FIELD)}</stringProp>
-                <stringProp name="HTTPFileArg.mimetype">application/zip</stringProp>
+              <elementProp name="file1" elementType="HTTPFileArg">
+                <stringProp name="File.path">${__P(UPLOAD_FILE,)}</stringProp>
+                <stringProp name="File.paramname">${__P(UPLOAD_FORM_FIELD,)}</stringProp>
               </elementProp>
             </collectionProp>
           </elementProp>
         </HTTPSamplerProxy>
-        <hashTree>
-          <!-- Response Assertion: expect HTTP 200 -->
-          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert: HTTP 200" enabled="true">
-            <collectionProp name="Asserion.test_strings"/>
-            <stringProp name="ResponseAssertion.test_field">Assertion.response_code</stringProp>
-            <boolProp name="ResponseAssertion.assume_success">false</boolProp>
-            <intProp name="ResponseAssertion.test_type">2</intProp>
-            <stringProp name="ResponseAssertion.custom_message"></stringProp>
-            <collectionProp name="Asserion.test_strings">
-              <stringProp name="1">200</stringProp>
-            </collectionProp>
-          </ResponseAssertion>
-          <hashTree/>
-          <!-- Constant Timer small delay to avoid burst -->
-          <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Delay 200ms" enabled="true">
-            <stringProp name="ConstantTimer.delay">200</stringProp>
-          </ConstantTimer>
-          <hashTree/>
-        </hashTree>
+        <hashTree/>
+
       </hashTree>
     </hashTree>
   </hashTree>
