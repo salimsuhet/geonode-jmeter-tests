@@ -4,7 +4,7 @@ set -e
 echo "=== GeoNode Load Testing – Running Test Plans ==="
 
 # Diretórios dentro do container
-TEST_PLANS_DIR="/test-plans"
+TEST_PLANS_DIR="/tests-plans"
 REPORTS_DIR="/reports"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 RUN_DIR="${REPORTS_DIR}/run_${TIMESTAMP}"

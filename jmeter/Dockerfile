@@ -12,6 +12,6 @@ ENV JMETER_HOME=/opt/jmeter
 ENV PATH="$PATH:$JMETER_HOME/bin"
 
 # Pastas usadas pelos volumes
-RUN mkdir -p /test-plans /scripts /reports /tests/data
+RUN mkdir -p /tests-plans /scripts /reports /tests/data
 
 WORKDIR /tests

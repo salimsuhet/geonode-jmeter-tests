@@ -85,7 +85,7 @@ docker compose down
 Inside the container:
 
 ```
-docker exec -it jmeter jmeter -n -t /test-plans/wfs_read.jmx -l /reports/wfs.jtl
+docker exec -it jmeter jmeter -n -t /tests-plans/wfs_read.jmx -l /reports/wfs.jtl
 ```
 
 Or run all tests automatically:

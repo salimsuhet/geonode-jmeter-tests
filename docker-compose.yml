@@ -6,7 +6,7 @@ services:
       dockerfile: Dockerfile
     env_file: .env
     volumes:
-      - ./jmeter/test-plans:/test-plans
+      - ./jmeter/tests-plans:/tests-plans
       - ./jmeter/scripts:/scripts
       - ./jmeter/reports:/reports
       - ./jmeter/data:/tests/data
@@ -45,6 +45,8 @@ services:
       --email ${CERTBOT_EMAIL}
       --agree-tos
       --no-eff-email
+      --non-interactive
+      --force-renewal
       -d ${CERTBOT_DOMAIN}
     networks:
       - jmeter-net
