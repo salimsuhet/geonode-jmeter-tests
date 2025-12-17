@@ -14,7 +14,7 @@ ENV PATH="$PATH:$JMETER_HOME/bin"
 RUN mkdir -p /tests-plans /scripts /reports /tests/data
 
 # Scripts JMeter
-COPY jmeter/scripts/ /scripts/
+COPY scripts/ /scripts/
 RUN chmod -R 755 /scripts
 
 WORKDIR /tests
