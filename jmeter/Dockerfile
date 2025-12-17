@@ -16,7 +16,7 @@ RUN mkdir -p /tests-plans /scripts /reports /tests/data
 
 # Scripts
 COPY scripts/ /scripts/
-RUN chmod +x /scripts/*.sh
+RUN chmod -R 755 /scripts
 
 WORKDIR /tests
 
