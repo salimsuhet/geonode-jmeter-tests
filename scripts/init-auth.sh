@@ -1,6 +1,16 @@
 #!/bin/bash
 set -e
 
+# Carrega variáveis do .env
+if [ -f ".env" ]; then
+  set -a
+  source .env
+  set +a
+else
+  echo "ERROR: arquivo .env não encontrado"
+  exit 1
+fi
+
 AUTH_DIR="./nginx/auth/"
 HTPASSWD_FILE="${AUTH_DIR}/htpasswd"
 
