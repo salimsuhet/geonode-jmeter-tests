@@ -24,7 +24,7 @@
             <stringProp name="Argument.value">${__P(LAYER_NAME,workspace:layer)}</stringProp>
           </elementProp>
           <elementProp name="WMS_BBOX" elementType="Argument">
-            <stringProp name="Argument.value">${__P(WMS_BBOX,-40,-20,-39,-19)}</stringProp>
+            <stringProp name="Argument.value">${__P(WMS_BBOX,-40 -20 -39 -19)}</stringProp>
           </elementProp>
           <elementProp name="WMS_WIDTH" elementType="Argument">
             <stringProp name="Argument.value">${__P(WMS_WIDTH,800)}</stringProp>
