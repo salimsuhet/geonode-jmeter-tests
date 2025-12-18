@@ -1,67 +1,143 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
   <hashTree>
-    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="WMS Load Test" enabled="true"/>
+
+    <!-- ================= TEST PLAN ================= -->
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="GeoServer WMS Load Test" enabled="true">
+      <stringProp name="TestPlan.comments">WMS GetMap load test for GeoNode / GeoServer</stringProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments">
+        <collectionProp name="Arguments.arguments">
+          <elementProp name="PROTOCOL" elementType="Argument">
+            <stringProp name="Argument.value">${__P(PROTOCOL,https)}</stringProp>
+          </elementProp>
+          <elementProp name="HOST" elementType="Argument">
+            <stringProp name="Argument.value">${__P(HOST,localhost)}</stringProp>
+          </elementProp>
+          <elementProp name="PORT" elementType="Argument">
+            <stringProp name="Argument.value">${__P(PORT,443)}</stringProp>
+          </elementProp>
+          <elementProp name="LAYER_NAME" elementType="Argument">
+            <stringProp name="Argument.value">${__P(LAYER_NAME,workspace:layer)}</stringProp>
+          </elementProp>
+          <elementProp name="WMS_BBOX" elementType="Argument">
+            <stringProp name="Argument.value">${__P(WMS_BBOX,-40,-20,-39,-19)}</stringProp>
+          </elementProp>
+          <elementProp name="WMS_WIDTH" elementType="Argument">
+            <stringProp name="Argument.value">${__P(WMS_WIDTH,800)}</stringProp>
+          </elementProp>
+          <elementProp name="WMS_HEIGHT" elementType="Argument">
+            <stringProp name="Argument.value">${__P(WMS_HEIGHT,600)}</stringProp>
+          </elementProp>
+          <elementProp name="WMS_FORMAT" elementType="Argument">
+            <stringProp name="Argument.value">${__P(WMS_FORMAT,image/png)}</stringProp>
+          </elementProp>
+        </collectionProp>
+      </elementProp>
+    </TestPlan>
+
     <hashTree>
+
+      <!-- ================= THREAD GROUP ================= -->
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="WMS Users" enabled="true">
-        <stringProp name="ThreadGroup.num_threads">${__env(USERS)}</stringProp>
-        <stringProp name="ThreadGroup.ramp_time">${__env(RAMPUP)}</stringProp>
-        <elementProp name="ThreadGroup.main_controller" elementType="LoopController">
-          <boolProp name="LoopController.continue_forever">false</boolProp>
+        <stringProp name="ThreadGroup.num_threads">${__P(threads,10)}</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">${__P(rampup,30)}</stringProp>
+
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <boolProp name="LoopController.continue_forever">true</boolProp>
           <stringProp name="LoopController.loops">-1</stringProp>
         </elementProp>
+
         <boolProp name="ThreadGroup.scheduler">true</boolProp>
-        <stringProp name="ThreadGroup.duration">${__env(DURATION)}</stringProp>
+        <stringProp name="ThreadGroup.duration">${__P(duration,120)}</stringProp>
       </ThreadGroup>
+
       <hashTree>
+
+        <!-- ================= HTTP DEFAULTS ================= -->
+        <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults" enabled="true">
+          <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
+          <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
+          <stringProp name="HTTPSampler.port">${PORT}</stringProp>
+          <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
+        </ConfigTestElement>
+
+        <hashTree/>
+
+        <!-- ================= BASIC AUTH ================= -->
+        <AuthManager guiclass="AuthPanel" testclass="AuthManager" testname="HTTP Authorization Manager" enabled="true">
+          <collectionProp name="AuthManager.auth_list">
+            <elementProp name="auth" elementType="Authorization">
+              <stringProp name="Authorization.url">.*</stringProp>
+              <stringProp name="Authorization.username">${__P(AUTH_USER,admin)}</stringProp>
+              <stringProp name="Authorization.password">${__P(AUTH_PASS,admin)}</stringProp>
+              <stringProp name="Authorization.domain"></stringProp>
+              <stringProp name="Authorization.realm"></stringProp>
+            </elementProp>
+          </collectionProp>
+        </AuthManager>
+
+        <hashTree/>
+
+        <!-- ================= WMS REQUEST ================= -->
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="WMS GetMap" enabled="true">
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
             <collectionProp name="Arguments.arguments">
-              <elementProp elementType="HTTPArgument" name="service">
-                <stringProp name="HTTPArgument.name">service</stringProp>
-                <stringProp name="HTTPArgument.value">WMS</stringProp>
+
+              <elementProp name="service" elementType="HTTPArgument">
+                <stringProp name="Argument.value">WMS</stringProp>
               </elementProp>
-              <elementProp elementType="HTTPArgument" name="request">
-                <stringProp name="HTTPArgument.name">request</stringProp>
-                <stringProp name="HTTPArgument.value">GetMap</stringProp>
+
+              <elementProp name="version" elementType="HTTPArgument">
+                <stringProp name="Argument.value">1.1.1</stringProp>
               </elementProp>
-              <elementProp elementType="HTTPArgument" name="layers">
-                <stringProp name="HTTPArgument.name">layers</stringProp>
-                <stringProp name="HTTPArgument.value">${__env(LAYER_NAME)}</stringProp>
+
+              <elementProp name="request" elementType="HTTPArgument">
+                <stringProp name="Argument.value">GetMap</stringProp>
               </elementProp>
-              <elementProp elementType="HTTPArgument" name="bbox">
-                <stringProp name="HTTPArgument.name">bbox</stringProp>
-                <stringProp name="HTTPArgument.value">${__env(WMS_BBOX)}</stringProp>
+
+              <elementProp name="layers" elementType="HTTPArgument">
+                <stringProp name="Argument.value">${LAYER_NAME}</stringProp>
               </elementProp>
-              <elementProp elementType="HTTPArgument" name="width">
-                <stringProp name="HTTPArgument.name">width</stringProp>
-                <stringProp name="HTTPArgument.value">${__env(WMS_WIDTH)}</stringProp>
+
+              <elementProp name="bbox" elementType="HTTPArgument">
+                <stringProp name="Argument.value">${WMS_BBOX}</stringProp>
               </elementProp>
-              <elementProp elementType="HTTPArgument" name="height">
-                <stringProp name="HTTPArgument.name">height</stringProp>
-                <stringProp name="HTTPArgument.value">${__env(WMS_HEIGHT)}</stringProp>
+
+              <elementProp name="width" elementType="HTTPArgument">
+                <stringProp name="Argument.value">${WMS_WIDTH}</stringProp>
               </elementProp>
-              <elementProp elementType="HTTPArgument" name="format">
-                <stringProp name="HTTPArgument.name">format</stringProp>
-                <stringProp name="HTTPArgument.value">${__env(WMS_FORMAT)}</stringProp>
+
+              <elementProp name="height" elementType="HTTPArgument">
+                <stringProp name="Argument.value">${WMS_HEIGHT}</stringProp>
               </elementProp>
+
+              <elementProp name="srs" elementType="HTTPArgument">
+                <stringProp name="Argument.value">EPSG:4326</stringProp>
+              </elementProp>
+
+              <elementProp name="format" elementType="HTTPArgument">
+                <stringProp name="Argument.value">${WMS_FORMAT}</stringProp>
+              </elementProp>
+
+              <elementProp name="styles" elementType="HTTPArgument">
+                <stringProp name="Argument.value"></stringProp>
+              </elementProp>
+
             </collectionProp>
           </elementProp>
-          <stringProp name="HTTPSampler.domain">${__env(HOST)}</stringProp>
-          <stringProp name="HTTPSampler.port">${__env(PORT)}</stringProp>
-          <stringProp name="HTTPSampler.protocol">${__env(PROTOCOL)}</stringProp>
+
           <stringProp name="HTTPSampler.path">/geoserver/ows</stringProp>
           <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
         </HTTPSamplerProxy>
-        <hashTree>
-          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert HTTP 200" enabled="true">
-            <stringProp name="ResponseAssertion.test_field">Assertion.response_code</stringProp>
-            <collectionProp name="Asserion.test_strings">
-              <stringProp name="1">200</stringProp>
-            </collectionProp>
-          </ResponseAssertion>
-          <hashTree/>
-        </hashTree>
+
+        <hashTree/>
+
       </hashTree>
     </hashTree>
   </hashTree>
