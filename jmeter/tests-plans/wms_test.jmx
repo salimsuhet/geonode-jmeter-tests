@@ -3,88 +3,112 @@
   <hashTree>
 
     <!-- ================= TEST PLAN ================= -->
-    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="GeoServer WMS Load Test" enabled="true">
-      <stringProp name="TestPlan.comments">WMS GetMap load test for GeoNode / GeoServer</stringProp>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan"
+              testname="WMS GetMap Render Test (ENV Driven + Random BBOX)"
+              enabled="true">
+
+      <stringProp name="TestPlan.comments">
+        Teste de renderização WMS GetMap com randomização de BBOX.
+        Todas as variáveis são carregadas do .env via variáveis de ambiente.
+      </stringProp>
+
       <boolProp name="TestPlan.functional_mode">false</boolProp>
       <boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp>
-      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
 
       <elementProp name="TestPlan.user_defined_variables" elementType="Arguments">
-        <collectionProp name="Arguments.arguments">
-          <elementProp name="PROTOCOL" elementType="Argument">
-            <stringProp name="Argument.value">${__P(PROTOCOL,https)}</stringProp>
-          </elementProp>
-          <elementProp name="HOST" elementType="Argument">
-            <stringProp name="Argument.value">${__P(HOST,localhost)}</stringProp>
-          </elementProp>
-          <elementProp name="PORT" elementType="Argument">
-            <stringProp name="Argument.value">${__P(PORT,443)}</stringProp>
-          </elementProp>
-          <elementProp name="LAYER_NAME" elementType="Argument">
-            <stringProp name="Argument.value">${__P(LAYER_NAME,workspace:layer)}</stringProp>
-          </elementProp>
-          <elementProp name="WMS_BBOX" elementType="Argument">
-            <stringProp name="Argument.value">${__P(WMS_BBOX,-40 -20 -39 -19)}</stringProp>
-          </elementProp>
-          <elementProp name="WMS_WIDTH" elementType="Argument">
-            <stringProp name="Argument.value">${__P(WMS_WIDTH,800)}</stringProp>
-          </elementProp>
-          <elementProp name="WMS_HEIGHT" elementType="Argument">
-            <stringProp name="Argument.value">${__P(WMS_HEIGHT,600)}</stringProp>
-          </elementProp>
-          <elementProp name="WMS_FORMAT" elementType="Argument">
-            <stringProp name="Argument.value">${__P(WMS_FORMAT,image/png)}</stringProp>
-          </elementProp>
-        </collectionProp>
+        <collectionProp name="Arguments.arguments"/>
       </elementProp>
+
+      <stringProp name="TestPlan.serialize_threadgroups">false</stringProp>
     </TestPlan>
 
     <hashTree>
 
       <!-- ================= THREAD GROUP ================= -->
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="WMS Users" enabled="true">
-        <stringProp name="ThreadGroup.num_threads">${__P(threads,10)}</stringProp>
-        <stringProp name="ThreadGroup.ramp_time">${__P(rampup,30)}</stringProp>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup"
+                   testname="WMS Users"
+                   enabled="true">
 
-        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
-          <boolProp name="LoopController.continue_forever">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
           <stringProp name="LoopController.loops">-1</stringProp>
         </elementProp>
 
-        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.num_threads">${__P(threads,10)}</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">${__P(rampup,30)}</stringProp>
         <stringProp name="ThreadGroup.duration">${__P(duration,120)}</stringProp>
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.delay">0</stringProp>
       </ThreadGroup>
 
       <hashTree>
 
         <!-- ================= HTTP DEFAULTS ================= -->
-        <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults" enabled="true">
-          <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
-          <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
-          <stringProp name="HTTPSampler.port">${PORT}</stringProp>
-          <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
+        <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement"
+                           testname="HTTP Defaults"
+                           enabled="true">
+
+          <stringProp name="HTTPSampler.protocol">${__env(PROTOCOL)}</stringProp>
+          <stringProp name="HTTPSampler.domain">${__env(HOST)}</stringProp>
+          <stringProp name="HTTPSampler.port">${__env(PORT)}</stringProp>
+          <stringProp name="HTTPSampler.path"></stringProp>
         </ConfigTestElement>
 
         <hashTree/>
 
-        <!-- ================= BASIC AUTH ================= -->
-        <AuthManager guiclass="AuthPanel" testclass="AuthManager" testname="HTTP Authorization Manager" enabled="true">
-          <collectionProp name="AuthManager.auth_list">
-            <elementProp name="auth" elementType="Authorization">
-              <stringProp name="Authorization.url">.*</stringProp>
-              <stringProp name="Authorization.username">${__P(AUTH_USER,admin)}</stringProp>
-              <stringProp name="Authorization.password">${__P(AUTH_PASS,admin)}</stringProp>
-              <stringProp name="Authorization.domain"></stringProp>
-              <stringProp name="Authorization.realm"></stringProp>
-            </elementProp>
-          </collectionProp>
-        </AuthManager>
+        <!-- ================= RANDOM BBOX GENERATOR ================= -->
+        <JSR223PreProcessor guiclass="TestBeanGUI"
+                            testclass="JSR223PreProcessor"
+                            testname="Random BBOX Generator (ENV)"
+                            enabled="true">
+
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="script">
+            <![CDATA[
+            double minX = Double.parseDouble(System.getenv("WMS_BBOX_MINX"))
+            double minY = Double.parseDouble(System.getenv("WMS_BBOX_MINY"))
+            double maxX = Double.parseDouble(System.getenv("WMS_BBOX_MAXX"))
+            double maxY = Double.parseDouble(System.getenv("WMS_BBOX_MAXY"))
+
+            double offset = Double.parseDouble(System.getenv("WMS_BBOX_OFFSET"))
+
+            double width  = maxX - minX
+            double height = maxY - minY
+
+            double dx = (Math.random() * offset * 2) - offset
+            double dy = (Math.random() * offset * 2) - offset
+
+            double newMinX = minX + dx
+            double newMaxX = newMinX + width
+            double newMinY = minY + dy
+            double newMaxY = newMinY + height
+
+            String bbox = String.format(
+              "%.2f,%.2f,%.2f,%.2f",
+              newMinX, newMinY, newMaxX, newMaxY
+            )
+
+            vars.put("BBOX", bbox)
+            ]]>
+          </stringProp>
+        </JSR223PreProcessor>
 
         <hashTree/>
 
-        <!-- ================= WMS REQUEST ================= -->
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="WMS GetMap" enabled="true">
-          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+        <!-- ================= WMS GETMAP ================= -->
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui"
+                          testclass="HTTPSamplerProxy"
+                          testname="WMS GetMap Render"
+                          enabled="true">
+
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <stringProp name="HTTPSampler.path">${__env(WMS_PATH)}</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+
+          <elementProp name="HTTPSampler.arguments" elementType="Arguments">
             <collectionProp name="Arguments.arguments">
 
               <elementProp name="service" elementType="HTTPArgument">
@@ -92,7 +116,7 @@
               </elementProp>
 
               <elementProp name="version" elementType="HTTPArgument">
-                <stringProp name="Argument.value">1.1.1</stringProp>
+                <stringProp name="Argument.value">${__env(WMS_VERSION)}</stringProp>
               </elementProp>
 
               <elementProp name="request" elementType="HTTPArgument">
@@ -100,43 +124,67 @@
               </elementProp>
 
               <elementProp name="layers" elementType="HTTPArgument">
-                <stringProp name="Argument.value">${LAYER_NAME}</stringProp>
+                <stringProp name="Argument.value">${__env(WMS_LAYER)}</stringProp>
               </elementProp>
 
               <elementProp name="bbox" elementType="HTTPArgument">
-                <stringProp name="Argument.value">${WMS_BBOX}</stringProp>
+                <stringProp name="Argument.value">${BBOX}</stringProp>
               </elementProp>
 
               <elementProp name="width" elementType="HTTPArgument">
-                <stringProp name="Argument.value">${WMS_WIDTH}</stringProp>
+                <stringProp name="Argument.value">${__env(WMS_WIDTH)}</stringProp>
               </elementProp>
 
               <elementProp name="height" elementType="HTTPArgument">
-                <stringProp name="Argument.value">${WMS_HEIGHT}</stringProp>
+                <stringProp name="Argument.value">${__env(WMS_HEIGHT)}</stringProp>
               </elementProp>
 
               <elementProp name="srs" elementType="HTTPArgument">
-                <stringProp name="Argument.value">EPSG:4326</stringProp>
+                <stringProp name="Argument.value">${__env(WMS_SRS)}</stringProp>
               </elementProp>
 
               <elementProp name="format" elementType="HTTPArgument">
-                <stringProp name="Argument.value">${WMS_FORMAT}</stringProp>
-              </elementProp>
-
-              <elementProp name="styles" elementType="HTTPArgument">
-                <stringProp name="Argument.value"></stringProp>
+                <stringProp name="Argument.value">${__env(WMS_FORMAT)}</stringProp>
               </elementProp>
 
             </collectionProp>
           </elementProp>
-
-          <stringProp name="HTTPSampler.path">/geoserver/ows</stringProp>
-          <stringProp name="HTTPSampler.method">GET</stringProp>
-          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
-          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
         </HTTPSamplerProxy>
 
-        <hashTree/>
+        <hashTree>
+
+          <!-- ================= ASSERTIONS ================= -->
+          <ResponseAssertion guiclass="AssertionGui"
+                             testclass="ResponseAssertion"
+                             testname="HTTP 200"
+                             enabled="true">
+
+            <collectionProp name="Asserion.test_strings">
+              <stringProp name="200">200</stringProp>
+            </collectionProp>
+
+            <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+            <intProp name="Assertion.test_type">2</intProp>
+          </ResponseAssertion>
+
+          <hashTree/>
+
+          <ResponseAssertion guiclass="AssertionGui"
+                             testclass="ResponseAssertion"
+                             testname="PNG Response"
+                             enabled="true">
+
+            <collectionProp name="Asserion.test_strings">
+              <stringProp name="image/png">image/png</stringProp>
+            </collectionProp>
+
+            <stringProp name="Assertion.test_field">Assertion.response_headers</stringProp>
+            <intProp name="Assertion.test_type">2</intProp>
+          </ResponseAssertion>
+
+          <hashTree/>
+
+        </hashTree>
 
       </hashTree>
     </hashTree>
